@@ -1,4 +1,4 @@
-# Project Description
+# Can we understand the CMIP6 intermodel spread of the Eastern Pacific response from land-sea contrasts?
 
 [Project pad](https://pad.gwdg.de/-gRNjrChQmqR8NeiddjMEg#)
 
@@ -48,7 +48,7 @@ Create the environment using either conda or mamba.
 Using mamba (recommended)
 ```
 mamba env create -f common/src/environment.yaml
-mamba activate <environment-name>
+mamba activate euclidyan-landheating
 ```
 Using conda: replace `mamba` by `conda`
 
