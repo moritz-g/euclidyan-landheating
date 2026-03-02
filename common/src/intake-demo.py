@@ -4,11 +4,6 @@ How to use intake to load CMIP6 data on levante.
 
 # %% imports
 import intake
-from dask.distributed import LocalCluster, Client
-from xmip.preprocessing import combined_preprocessing
-import traceback
-import pandas as pd
-from dask import delayed
 import re
 import xarray as xr
 import os
