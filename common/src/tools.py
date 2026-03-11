@@ -44,10 +44,12 @@ def select_sep(ds, lsm, xy1=(235, 0), xy2=(290, 0), xy3=(290, -50)):
             if polygon.contains(shapely.geometry.Point(lon, lat)):
                 mask[i, j] = True
 
+    # force land-sea mask to be between 0 and 1 (sometimes between 0 and 100)
+    if lsm.max() > 10:
+        lsm = lsm / 100
     # Select data where mask is True and only ocean
     return ds.where(
-        xr.DataArray(mask, coords=[("lat", lats), ("lon", lons)]) & (lsm == 0),
-        drop=True,
+        xr.DataArray(mask, coords=[("lat", lats), ("lon", lons)]) & (lsm < 0.5),
     )
 
 
@@ -116,15 +118,15 @@ def fldmean(ds, da_area):
     if xdim in ds.coords and ydim in ds.coords:
         assert set(ds[xdim].values).issubset(set(da_area[xdim].values))
         if isinstance(ds, xr.core.dataset.Dataset):
-            ds_weighted = ds.weighted(da_area)
+            ds_weighted = ds.weighted(da_area.fillna(0))
         elif isinstance(ds, xr.core.dataarray.DataArray):
-            ds_weighted = ds.weighted(da_area)
+            ds_weighted = ds.weighted(da_area.fillna(0))
         return ds_weighted.mean([ydim, xdim], skipna=True)
     elif ydim in ds.coords:
         if isinstance(ds, xr.core.dataset.Dataset):
-            ds_weighted = ds.weighted(da_area.mean(xdim))
+            ds_weighted = ds.weighted(da_area.mean(xdim).fillna(0))
         elif isinstance(ds, xr.core.dataarray.DataArray):
-            ds_weighted = ds.weighted(da_area.mean(xdim))
+            ds_weighted = ds.weighted(da_area.mean(xdim).fillna(0))
         return ds_weighted.mean([ydim], skipna=True)
 
 
@@ -198,6 +200,6 @@ def centroid(da, da_area, lat_min=-30, lat_max=30):
     assert set(da[ydim].values).issubset(set(da_area[ydim].values))
     assert set(da[xdim].values).issubset(set(da_area[xdim].values))
 
-    da = da.sel(**{ydim: slice(lat_max, lat_min)})
+    da = da.sel(**{ydim: slice(lat_min, lat_max)})
     centroid = (da * da[ydim] * da_area).sum(ydim) / (da * da_area).sum(ydim)
     return centroid
